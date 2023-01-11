@@ -1,7 +1,9 @@
+import 'package:agendai_ufsm/AppController.dart';
+import 'package:agendai_ufsm/components/DarkSwitch.dart';
 import 'package:flutter/material.dart';
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+  MyHomePage({super.key, required this.title});
 
   final String title;
 
@@ -10,47 +12,33 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text(
-              'You have click the button this many times:',
-              style: TextStyle(fontSize: 18),
-            ),
-            GestureDetector(
-              child: Text(
-                '$_counter',
-                style: Theme.of(context).textTheme.headline3,
-              ),
-              onDoubleTap: () {
-                setState(() {
-                  _counter++;
-                });
-              },
-            )
-          ],
+        appBar: AppBar(
+          title: Text(widget.title),
+          actions: [DarkSwitch()],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ),
-    );
+        body: Container(
+            height: double.infinity,
+            width: double.infinity,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  width: 50,
+                  height: 50,
+                  color: AppController.instance.isDarkTheme
+                      ? Colors.white
+                      : Colors.black,
+                ),
+                DarkSwitch(),
+                Text(
+                  "Ola mundo",
+                  style: TextStyle(fontSize: 15),
+                )
+              ],
+            )));
   }
 }

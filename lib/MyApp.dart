@@ -1,3 +1,5 @@
+import 'package:agendai_ufsm/AppController.dart';
+import 'package:agendai_ufsm/pages/ExempleTesseractPage.dart';
 import 'package:agendai_ufsm/pages/MyHomePage.dart';
 import 'package:flutter/material.dart';
 
@@ -6,12 +8,18 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Titulo ola mundo',
-      theme: ThemeData(
-        primarySwatch: Colors.blueGrey,
-      ),
-      home: const MyHomePage(title: 'Ola mundo'),
-    );
+    return AnimatedBuilder(
+        animation: AppController.instance,
+        builder: (context, child) {
+          return MaterialApp(
+              title: 'Titulo ola mundo',
+              theme: ThemeData(
+                  primarySwatch: Colors.blueGrey,
+                  brightness: AppController.instance.isDarkTheme
+                      ? Brightness.dark
+                      : Brightness.light),
+              //home: MyHomePage(title: 'Ola mundo'),
+              home: ExempleTesseractPage(title: "Ola mundo"));
+        });
   }
 }
