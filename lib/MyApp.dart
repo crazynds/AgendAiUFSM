@@ -1,5 +1,4 @@
 import 'package:agendai_ufsm/AppController.dart';
-import 'package:agendai_ufsm/pages/ExempleTesseractPage.dart';
 import 'package:agendai_ufsm/pages/MyHomePage.dart';
 import 'package:flutter/material.dart';
 
@@ -18,8 +17,8 @@ class MyApp extends StatelessWidget {
                   brightness: AppController.instance.isDarkTheme
                       ? Brightness.dark
                       : Brightness.light),
-              //home: MyHomePage(title: 'Ola mundo'),
-              home: ExempleTesseractPage(title: "Ola mundo"));
+              home: MyHomePage(title: 'AgendAí PUFAVO'));
+          //home: ExempleTesseractPage(title: "Ola mundo"));
         });
   }
 }

@@ -11,7 +11,7 @@ class OCRController {
     if (kIsWeb == false &&
         (url.indexOf("http://") == 0 || url.indexOf("https://") == 0)) {
       Directory tempDir = await getTemporaryDirectory();
-      HttpClient httpClient = new HttpClient();
+      HttpClient httpClient = HttpClient();
       HttpClientRequest request = await httpClient.getUrl(Uri.parse(url));
       HttpClientResponse response = await request.close();
       Uint8List bytes = await consolidateHttpClientResponseBytes(response);
