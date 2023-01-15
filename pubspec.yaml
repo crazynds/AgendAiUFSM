@@ -44,6 +44,8 @@ dependencies:
   dio_cookie_manager: ^2.0.0
   cookie_jar: ^3.0.1
   intl: ^0.18.0
+  workmanager: ^0.5.1
+  url_launcher: ^5.2.7
 
 dev_dependencies:
   flutter_test:

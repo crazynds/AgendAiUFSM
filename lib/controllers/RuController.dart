@@ -3,13 +3,15 @@ import 'dart:io';
 
 import 'package:agendai_ufsm/controllers/HttpController.dart';
 import 'package:agendai_ufsm/controllers/OCRController.dart';
+import 'package:agendai_ufsm/models/User.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_tesseract_ocr/android_ios.dart';
 import 'package:intl/intl.dart';
 
 enum RestauranteUFSM{
-  ru1(40),
-  ru2(41);
+  ru1(1),
+  ru2(41),
+  ruPalmeiraDasMissoes(3);
 
   final int code;
   const RestauranteUFSM(this.code);
@@ -26,23 +28,25 @@ enum TipoRefeicao{
 
 class RuController {
 
-  static Future<bool> auth(String code, String password) async {
+  static Future<User?> auth(String code, String password) async {
 
     var response = await HttpController.instance.post('https://portal.ufsm.br/ru/j_security_check', Options(contentType: Headers.formUrlEncodedContentType), {
       'j_username': code,
       'j_password': password
     });
     String? responseStr = response.data;
-    if (response.statusCode != 302)return false;
+    if (response.statusCode != 302)return null;
 
     var response2 = await HttpController.instance.get('https://portal.ufsm.br/ru/usuario/extratoSimplificado.html', Options());
 
     responseStr = response2.data;
     
     if (response2.statusCode! >= 200 && response2.statusCode! <= 299 && responseStr!=null && responseStr.contains('<title>Controle de restaurantes universit')) {
-      return true;
+      final regex = RegExp(r'<i class="icon-user"><\/i> (.+) <span class="caret"><\/span>');
+      final mathc = regex.firstMatch(responseStr);
+      return User(mathc?.group(1) ?? 'Nome não encontrado');
     } else {
-      return false;
+      return null;
     }
   }
 
@@ -64,7 +68,7 @@ class RuController {
         'periodo.fim': DateFormat('dd/MM/yyyy').format(day),
         'restaurante': restaurante.code,
         'tiposRefeicao': refeicao.code,
-        'opcaoVegetariana': vegetariano? "true": false,
+        'opcaoVegetariana': vegetariano? "true": 'false',
         'captcha': captcha
       };
       var response = await HttpController.instance.post('https://portal.ufsm.br/ru/usuario/agendamento/form.html', Options(contentType: Headers.formUrlEncodedContentType),data );

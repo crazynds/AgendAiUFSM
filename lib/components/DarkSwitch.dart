@@ -1,4 +1,4 @@
-import 'package:agendai_ufsm/AppController.dart';
+import 'package:agendai_ufsm/controllers/AppController.dart';
 import 'package:flutter/material.dart';
 
 class DarkSwitch extends StatelessWidget {

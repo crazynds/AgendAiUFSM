@@ -32,4 +32,8 @@ class OCRController {
     print('end processing');
     return _ocrText;
   }
+  Future<bool> fixRecycle()async {
+      await getText('https://tesseract.projectnaptha.com/img/eng_bw.png', ['eng'], {});
+      return true;
+  }
 }
