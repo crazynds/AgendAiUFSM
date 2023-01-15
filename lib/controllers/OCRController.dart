@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:agendai_ufsm/controllers/HttpController.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_tesseract_ocr/android_ios.dart';
 import 'package:path_provider/path_provider.dart';
@@ -11,14 +13,16 @@ class OCRController {
     if (kIsWeb == false &&
         (url.indexOf("http://") == 0 || url.indexOf("https://") == 0)) {
       Directory tempDir = await getTemporaryDirectory();
-      HttpClient httpClient = HttpClient();
-      HttpClientRequest request = await httpClient.getUrl(Uri.parse(url));
-      HttpClientResponse response = await request.close();
-      Uint8List bytes = await consolidateHttpClientResponseBytes(response);
+      // HttpClient httpClient = HttpClient();
+      // HttpClientRequest request = await httpClient.getUrl(Uri.parse(url));
+      // HttpClientResponse response = await request.close();
+      // Uint8List bytes = await consolidateHttpClientResponseBytes(response);
+    
+
       String dir = tempDir.path;
-      File file = File('$dir/test.jpg');
-      await file.writeAsBytes(bytes);
-      url = file.path;
+      String fullPath = '$dir/test.jpg';
+      await HttpController.instance.getFile(url, Options(), fullPath);
+      url = fullPath;
     }
     var langs = selectList.join("+");
     print('start processing');
