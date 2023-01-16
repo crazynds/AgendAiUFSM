@@ -35,6 +35,12 @@ class RuController {
       'j_password': password
     });
     String? responseStr = response.data;
+    
+    print({
+      'j_username': code,
+      'j_password': password
+    });
+    print(responseStr);
     if (response.statusCode != 302)return null;
 
     var response2 = await HttpController.instance.get('https://portal.ufsm.br/ru/usuario/extratoSimplificado.html', Options());

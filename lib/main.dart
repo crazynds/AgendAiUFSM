@@ -1,6 +1,7 @@
 import 'package:agendai_ufsm/MyApp.dart';
 import 'package:agendai_ufsm/controllers/OCRController.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:workmanager/workmanager.dart';
 
 
@@ -17,7 +18,7 @@ void callbackDispatcher() {
 }
 
 
-void main() {
+void main()async{
   runApp(const MainApp());
 }
 

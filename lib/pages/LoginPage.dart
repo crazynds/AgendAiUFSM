@@ -4,22 +4,26 @@ import 'package:agendai_ufsm/controllers/AppController.dart';
 import 'package:agendai_ufsm/controllers/RuController.dart';
 import 'package:agendai_ufsm/pages/MyHomePage.dart';
 import 'package:agendai_ufsm/pages/TermosPage.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:workmanager/workmanager.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 
 class LoginPage extends StatefulWidget {
 
   LoginPage();
 
   @override
-  State<StatefulWidget> createState() {
+  State<LoginPage> createState() {
     return _LoginPage();
   }
 }
 
 class _LoginPage extends State<LoginPage> {
+  final _formKey = GlobalKey<FormState>();
+  String _matricula = dotenv.env['DEFAULT_MATRICULA'] as String;
+  String _senha = dotenv.env['DEFAULT_PASSWORD'] as String;
+
   bool _isNumeric(String s) {
     return int.parse(
           s,
@@ -47,13 +51,6 @@ class _LoginPage extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    String _matricula = '202210721';
-    String _senha = '***REMOVED***';
-
-    bool loading = false;
-
-    final _formKey = GlobalKey<FormState>();
-
     return Scaffold(
       appBar: AppBar(
         title: Text('Login'),
@@ -66,8 +63,8 @@ class _LoginPage extends State<LoginPage> {
               SizedBox(
                 height: 5,
                 child: Visibility(
-                  child: LinearProgressIndicator(),
                   visible: AppController.instance.isLoading,
+                  child: LinearProgressIndicator(),
                 )
               ),
               Form(

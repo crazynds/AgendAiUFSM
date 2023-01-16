@@ -46,6 +46,7 @@ dependencies:
   intl: ^0.18.0
   workmanager: ^0.5.1
   url_launcher: ^5.2.7
+  flutter_dotenv: ^5.0.2
 
 dev_dependencies:
   flutter_test:
@@ -74,6 +75,7 @@ flutter:
     - assets/tessdata_config.json
     - assets/tessdata/eng.traineddata
     - assets/tessdata/por.traineddata
+    - .env
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
