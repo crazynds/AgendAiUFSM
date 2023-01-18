@@ -8,9 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:workmanager/workmanager.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-
 class LoginPage extends StatefulWidget {
-
   LoginPage();
 
   @override
@@ -61,71 +59,84 @@ class _LoginPage extends State<LoginPage> {
           child: Column(
             children: [
               SizedBox(
-                height: 5,
-                child: Visibility(
-                  visible: AppController.instance.isLoading,
-                  child: LinearProgressIndicator(),
-                )
-              ),
+                  height: 5,
+                  child: Visibility(
+                    visible: AppController.instance.isLoading,
+                    child: LinearProgressIndicator(),
+                  )),
               Form(
                 key: _formKey,
                 child: Padding(
                   padding: EdgeInsets.all(48.0),
-                  child:
-                      Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                    SizedBox(
-                        height: 90,
-                        child: TextFormField(
-                          onChanged: (value) {
-                            _matricula = value;
-                          },
-                          initialValue: _matricula,
-                          decoration: InputDecoration(
-                              labelText: 'Matricula', border: OutlineInputBorder()),
-                          validator: _matriculaValidator,
-                        )),
-                    SizedBox(
-                        height: 100,
-                        child: TextFormField(
-                          onChanged: (value) {
-                            _senha = value;
-                          },
-                          initialValue: _matricula,
-                          decoration: InputDecoration(
-                              labelText: 'Senha', border: OutlineInputBorder()),
-                          validator: _senhaValidator,
-                          obscureText: true,
-                        )),
-                    ElevatedButton(
-                        onPressed: () {
-                          if (_formKey.currentState!.validate()) {
-                            AppController.instance.setLoading(true);
-                            RuController.auth(_matricula, _senha).then((value) {
-                              var bar;
-                              if (value!=null) {
-                                bar = SnackBar(content: Text('Login com sucesso'));
-                                Navigator.of(context).push(MaterialPageRoute(
-                                  builder: (context) => MyHomePage(title: value.name)
-                                ));
-                              } else {
-                                bar = SnackBar(content: Text('Não feito login'));
+                  child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                            height: 90,
+                            child: TextFormField(
+                              onChanged: (value) {
+                                _matricula = value;
+                              },
+                              initialValue: _matricula,
+                              decoration: InputDecoration(
+                                  labelText: 'Matricula',
+                                  border: OutlineInputBorder()),
+                              validator: _matriculaValidator,
+                            )),
+                        SizedBox(
+                            height: 100,
+                            child: TextFormField(
+                              onChanged: (value) {
+                                _senha = value;
+                              },
+                              initialValue: _matricula,
+                              decoration: InputDecoration(
+                                  labelText: 'Senha',
+                                  border: OutlineInputBorder()),
+                              validator: _senhaValidator,
+                              obscureText: true,
+                            )),
+                        ElevatedButton(
+                            onPressed: () {
+                              if (_formKey.currentState!.validate()) {
+                                AppController.instance.setLoading(true);
+                                RuController.auth(_matricula, _senha)
+                                    .then((value) {
+                                  var bar;
+                                  if (value != null) {
+                                    bar = SnackBar(
+                                        content: Text('Login com sucesso'));
+                                    Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                MyHomePage(title: value.name)));
+                                  } else {
+                                    bar = SnackBar(
+                                        content: Text('Não feito login'));
+                                  }
+                                  ScaffoldMessenger.of(context)
+                                      .showSnackBar(bar);
+                                  AppController.instance.setLoading(false);
+                                });
                               }
-                              ScaffoldMessenger.of(context).showSnackBar(bar);
-                              AppController.instance.setLoading(false);
-                            });
-                          }
-                        },
-                        child: Text('Entrar')),
-                    ElevatedButton(onPressed: () {
-                      Workmanager().cancelByUniqueName("agendar-ru");
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Agendamento automático desativo')));
-                    }, child: Text('Desativar agendamento automático')),
-                    ElevatedButton(onPressed: () {
-                      Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => TermosPage()
-                      ));
-                    }, child: Text('Entenda como funciona!')),
-                  ]),
+                            },
+                            child: Text('Entrar')),
+                        ElevatedButton(
+                            onPressed: () {
+                              Workmanager().cancelByUniqueName("agendar-ru");
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                      content: Text(
+                                          'Agendamento automático desativo')));
+                            },
+                            child: Text('Desativar agendamento automático')),
+                        ElevatedButton(
+                            onPressed: () {
+                              Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (context) => TermosPage()));
+                            },
+                            child: Text('Entenda como funciona!')),
+                      ]),
                 ),
               ),
             ],
