@@ -17,7 +17,6 @@ class OCRController {
       // HttpClientRequest request = await httpClient.getUrl(Uri.parse(url));
       // HttpClientResponse response = await request.close();
       // Uint8List bytes = await consolidateHttpClientResponseBytes(response);
-    
 
       String dir = tempDir.path;
       String fullPath = '$dir/test.jpg';
@@ -32,8 +31,9 @@ class OCRController {
     print('end processing');
     return _ocrText;
   }
-  Future<bool> fixRecycle()async {
-      await getText('https://tesseract.projectnaptha.com/img/eng_bw.png', ['eng'], {});
-      return true;
+
+  Future<void> fixRecycle() async {
+    await getText(
+        'https://tesseract.projectnaptha.com/img/eng_bw.png', ['eng'], {});
   }
 }

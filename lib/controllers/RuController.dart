@@ -39,6 +39,21 @@ enum TipoRefeicao {
   const TipoRefeicao(this.code);
 }
 
+enum RuAgendamentoErro {
+  ok("Agendamento feito!"),
+  conexao("Problema de conexao com o servidor"),
+  matricula("Problema no login (matricula e senha)"),
+  unknown("Não sei pq esse erro aconteceu. Isso me deixa triste"),
+  captcha("Não foi possivel adivinhar o captcha ;-;"),
+  agendamentoCheio("O limite de agendamentos no restaurante já foi atingido."),
+  naoEhPossivelAgendar("Não é possivel agendar para essa data"),
+  bseNecessario(
+      "É necessário ter o benefício do BSE para agendar para esse dia.");
+
+  final String msg;
+  const RuAgendamentoErro(this.msg);
+}
+
 class RuController {
   static Future<User?> auth(String code, String password) async {
     var response = await HttpController.instance.post(
@@ -63,25 +78,27 @@ class RuController {
         responseStr.contains('<title>Controle de restaurantes universit')) {
       final regex = RegExp(
           r'<i class="icon-user"><\/i> (.+) <span class="caret"><\/span>');
-      final mathc = regex.firstMatch(responseStr);
-      return User(mathc?.group(1) ?? 'Nome não encontrado');
+      final match = regex.firstMatch(responseStr);
+      return User(match?.group(1) ?? 'Nome não encontrado');
     } else {
       return null;
     }
   }
 
-  static Future<bool> agendar(RestauranteUFSM restaurante, DateTime day,
-      TipoRefeicao refeicao, bool vegetariano) async {
+  static Future<RuAgendamentoErro> agendar(RestauranteUFSM restaurante,
+      DateTime day, TipoRefeicao refeicao, bool vegetariano) async {
     var response2 = await HttpController.instance.get(
         'https://portal.ufsm.br/ru/usuario/extratoSimplificado.html',
         Options());
+    if (response2.statusCode == 599) return RuAgendamentoErro.conexao;
     if (response2.statusCode! < 200 ||
         response2.statusCode! > 299 ||
-        response2.data == null ||
-        !response2.data.contains('<title>Controle de restaurantes universit')) {
-      return false;
+        response2.data == null) return RuAgendamentoErro.conexao;
+    if (!response2.data.contains('<title>Controle de restaurantes universit')) {
+      return RuAgendamentoErro.matricula;
     }
     String responseStr;
+    int tries = 0;
     do {
       String captcha = await OCRController.instance
           .getText('https://portal.ufsm.br/ru/usuario/captcha.html', [
@@ -90,7 +107,6 @@ class RuController {
         'tessedit_char_whitelist': 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
         'tessedit_pageseg_mode': 'SINGLE_WORD',
       });
-      print(captcha);
       var data = {
         'periodo.inicio': DateFormat('dd/MM/yyyy').format(day),
         'periodo.fim': DateFormat('dd/MM/yyyy').format(day),
@@ -103,24 +119,45 @@ class RuController {
           'https://portal.ufsm.br/ru/usuario/agendamento/form.html',
           Options(contentType: Headers.formUrlEncodedContentType),
           data);
-      if (response.data == Null) {
-        return false;
-      }
-      if (response.statusCode != 200) {
-        return false;
+      if (response.data == Null || response.statusCode != 200) {
+        return RuAgendamentoErro.conexao;
       }
       responseStr = response.data as String;
+      tries++;
     } while (
-        responseStr.contains('<span class="pill error" id="_captcha">Campo'));
-    for (String l in responseStr.split('\n')) {
-      print(l);
+        responseStr.contains('<span class="pill error" id="_captcha">Campo') &&
+            tries <= 8);
+
+    if (tries > 8 &&
+        responseStr.contains('<span class="pill error" id="_captcha">Campo')) {
+      return RuAgendamentoErro.captcha;
     }
+
     if (responseStr.contains('Resultado da solicita')) {
-      print('Foi com sucesso');
-      return true;
+      final problemaRegex = RegExp(
+          r'<span class="sr-only">.*<\/span>[\s]*<span class="(.*) pill">.*<\/span>[\s]*<\/td>[\s]*<td>[\s]*(.*)[\s]*<\/td>');
+      final match = problemaRegex.firstMatch(responseStr);
+      if (match == null) return RuAgendamentoErro.unknown;
+      final String tag = match.group(1) as String;
+      final String message = match.group(2) as String;
+      if (tag == 'error') {
+        if (message.contains('existe um agendamento com estes dados')) {
+          return RuAgendamentoErro.ok;
+        } else if (message
+            .contains('O limite de agendamentos no restaurante')) {
+          return RuAgendamentoErro.agendamentoCheio;
+        } else if (message.contains('o autoriza para o final de semana')) {
+          return RuAgendamentoErro.bseNecessario;
+        } else {
+          return RuAgendamentoErro.naoEhPossivelAgendar;
+        }
+      } else if (tag == 'success') {
+        return RuAgendamentoErro.ok;
+      } else {
+        return RuAgendamentoErro.unknown;
+      }
     } else {
-      print('Foi com sucesso');
-      return false;
+      return RuAgendamentoErro.unknown;
     }
   }
 }

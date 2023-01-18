@@ -49,7 +49,7 @@ class RuScheduleConfiguration extends Model {
     janta = data['janta'] as bool;
     local = RestauranteUFSM.getByCode(data['local'] as int);
     fimSchedule = DateFormat("dd/MM/yyyy").parse(data['fimSchedule'] as String);
-    dayOfWeeks = data['dayOfWeeks'] as List<bool>;
+    dayOfWeeks = List<bool>.from(data['dayOfWeeks']);
   }
 
   @override

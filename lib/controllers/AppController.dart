@@ -10,12 +10,8 @@ class AppController extends ChangeNotifier {
     notifyListeners();
   }
 
-  setLoading(bool isLoading){
+  setLoading(bool isLoading) {
     this.isLoading = isLoading;
     notifyListeners();
   }
-
-
-
-
 }

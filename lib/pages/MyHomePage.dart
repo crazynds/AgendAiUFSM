@@ -277,10 +277,11 @@ class _MyHomePageState extends State<MyHomePage> {
                           DateFormat("dd/MM/yyyy").parse(_dateController.text);
                       ru.local = _restauranteUfsm;
                       ru.save();
+                      Workmanager().cancelByUniqueName("agendar-ru");
                       Workmanager().registerPeriodicTask(
                           "agendar-ru", "agendar-ru",
-                          frequency: Duration(hours: 1),
-                          initialDelay: Duration(minutes: 5));
+                          frequency: Duration(minutes: 15),
+                          initialDelay: Duration(minutes: 1));
                     },
                     child: Text('Iniciar agendamento'),
                   ),
