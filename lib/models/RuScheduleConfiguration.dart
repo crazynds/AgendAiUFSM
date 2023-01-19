@@ -1,64 +1,52 @@
-import 'dart:io';
-
-import 'package:agendai_ufsm/controllers/FileController.dart';
 import 'package:agendai_ufsm/controllers/RuController.dart';
 import 'package:agendai_ufsm/models/Model.dart';
 import 'package:intl/intl.dart';
 
 class RuScheduleConfiguration extends Model {
-  static const _fileName = 'scheduler.json';
-
-  List<bool> dayOfWeeks;
+  static final String _fileName = 'scheduleConfig.json';
+  List<bool> dayOfWeek;
 
   bool cafe, almoco, janta;
   RestauranteUFSM local;
 
   DateTime fimSchedule;
-  static RuScheduleConfiguration? _instance;
 
-  RuScheduleConfiguration()
-      : cafe = false,
-        almoco = false,
-        janta = false,
-        local = RestauranteUFSM.ru1,
-        fimSchedule = DateTime.now(),
-        dayOfWeeks = [false, false, false, false, false, false, false];
-
-  static RuScheduleConfiguration load() {
-    if (_instance != null) {
-      return _instance as RuScheduleConfiguration;
-    }
-    RuScheduleConfiguration ru = RuScheduleConfiguration();
-    Map<String, dynamic> data = FileController.read(_fileName);
-
-    if (data.isNotEmpty) {
-      ru.fromJson(data);
-    }
-    _instance = ru;
-    return ru;
-  }
-
-  void save() {
-    FileController.write(_fileName, this);
-  }
+  RuScheduleConfiguration(
+      {required this.cafe,
+      required this.almoco,
+      required this.janta,
+      required this.local,
+      required this.dayOfWeek,
+      required this.fimSchedule});
 
   @override
-  void fromJson(Map<String, dynamic> data) {
-    almoco = data['almoco'] as bool;
-    cafe = data['cafe'] as bool;
-    janta = data['janta'] as bool;
-    local = RestauranteUFSM.getByCode(data['local'] as int);
-    fimSchedule = DateFormat("dd/MM/yyyy").parse(data['fimSchedule'] as String);
-    dayOfWeeks = List<bool>.from(data['dayOfWeeks']);
-  }
+  factory RuScheduleConfiguration.fromJson(Map<String, dynamic> data) =>
+      RuScheduleConfiguration(
+          cafe: data['cafe'] ?? false,
+          almoco: data['almoco'] ?? false,
+          janta: data['janta'] ?? false,
+          local: RestauranteUFSM.values[data['restaurante'] ?? 0],
+          fimSchedule: DateFormat("dd/MM/yyyy").parse(
+              data['fimSchedule'] as String ??
+                  DateFormat("dd/MM/yyyy").format(DateTime.now())),
+          dayOfWeek: List<bool>.from(data['dayOfWeek'] ??
+              [false, false, false, false, false, false, false]));
 
   @override
   Map<String, dynamic> toJson() => {
         'cafe': cafe,
         'almoco': almoco,
         'janta': janta,
-        'local': local.code,
+        'restaurante': local.index,
         'fimSchedule': DateFormat('dd/MM/yyyy').format(fimSchedule),
-        'dayOfWeeks': dayOfWeeks
+        'dayOfWeek': dayOfWeek
       };
+
+  static RuScheduleConfiguration load() {
+    return Model.singletonFromFile<RuScheduleConfiguration>(_fileName);
+  }
+
+  void save() {
+    saveInFile(_fileName);
+  }
 }

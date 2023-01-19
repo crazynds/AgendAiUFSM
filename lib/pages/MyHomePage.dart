@@ -35,7 +35,7 @@ class _MyHomePageState extends State<MyHomePage> {
     _cafe = ruConfig.cafe;
     _janta = ruConfig.janta;
     _restauranteUfsm = ruConfig.local;
-    _diasDaSemana = List<bool>.from(ruConfig.dayOfWeeks);
+    _diasDaSemana = List<bool>.from(ruConfig.dayOfWeek);
     _dateController.text =
         DateFormat("dd/MM/yyyy").format(ruConfig.fimSchedule);
   }
@@ -267,12 +267,12 @@ class _MyHomePageState extends State<MyHomePage> {
                 Padding(
                   padding: const EdgeInsets.only(top: 28.0),
                   child: ElevatedButton(
-                    onPressed: () async {
-                      var ru = await RuScheduleConfiguration.load();
+                    onPressed: () {
+                      var ru = RuScheduleConfiguration.load();
                       ru.cafe = _cafe;
                       ru.almoco = _almoco;
                       ru.janta = _janta;
-                      ru.dayOfWeeks = new List<bool>.from(_diasDaSemana);
+                      ru.dayOfWeek = List<bool>.from(_diasDaSemana);
                       ru.fimSchedule =
                           DateFormat("dd/MM/yyyy").parse(_dateController.text);
                       ru.local = _restauranteUfsm;

@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:agendai_ufsm/controllers/HttpController.dart';
 import 'package:agendai_ufsm/controllers/OCRController.dart';
+import 'package:agendai_ufsm/models/RuSchedule.dart';
 import 'package:agendai_ufsm/models/User.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_tesseract_ocr/android_ios.dart';
@@ -85,8 +86,7 @@ class RuController {
     }
   }
 
-  static Future<RuAgendamentoErro> agendar(RestauranteUFSM restaurante,
-      DateTime day, TipoRefeicao refeicao, bool vegetariano) async {
+  static Future<RuAgendamentoErro> agendar(RuSchedule schedule) async {
     var response2 = await HttpController.instance.get(
         'https://portal.ufsm.br/ru/usuario/extratoSimplificado.html',
         Options());
@@ -108,11 +108,11 @@ class RuController {
         'tessedit_pageseg_mode': 'SINGLE_WORD',
       });
       var data = {
-        'periodo.inicio': DateFormat('dd/MM/yyyy').format(day),
-        'periodo.fim': DateFormat('dd/MM/yyyy').format(day),
-        'restaurante': restaurante.code,
-        'tiposRefeicao': refeicao.code,
-        'opcaoVegetariana': vegetariano ? "true" : 'false',
+        'periodo.inicio': schedule.data,
+        'periodo.fim': schedule.data,
+        'restaurante': schedule.restaurante.code,
+        'tiposRefeicao': schedule.refeicao.code,
+        'opcaoVegetariana': schedule.vegetariano ? "true" : 'false',
         'captcha': captcha
       };
       var response = await HttpController.instance.post(

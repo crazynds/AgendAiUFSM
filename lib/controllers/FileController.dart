@@ -25,7 +25,7 @@ class FileController {
     final path = directory.path;
     final file = File('$path/$fileName');
     if (!file.existsSync()) {
-      return Map<String, dynamic>();
+      return <String, dynamic>{};
     }
     final content = file.readAsStringSync();
     return convert.jsonDecode(content);
