@@ -22,13 +22,14 @@ class RuScheduleConfiguration extends Model {
   @override
   factory RuScheduleConfiguration.fromJson(Map<String, dynamic> data) =>
       RuScheduleConfiguration(
-          cafe: data['cafe'] ?? false,
-          almoco: data['almoco'] ?? false,
-          janta: data['janta'] ?? false,
+          cafe: data['cafe'] as bool? ?? false,
+          almoco: data['almoco'] as bool? ?? false,
+          janta: data['janta'] as bool? ?? false,
           local: RestauranteUFSM.values[data['restaurante'] ?? 0],
           fimSchedule: DateFormat("dd/MM/yyyy").parse(
-              data['fimSchedule'] as String ??
-                  DateFormat("dd/MM/yyyy").format(DateTime.now())),
+              data['fimSchedule'] as String? ??
+                  DateFormat("dd/MM/yyyy")
+                      .format(DateTime.now().subtract(Duration(days: 3)))),
           dayOfWeek: List<bool>.from(data['dayOfWeek'] ??
               [false, false, false, false, false, false, false]));
 

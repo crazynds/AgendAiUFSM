@@ -56,15 +56,13 @@ enum RuAgendamentoErro {
 }
 
 class RuController {
-  static Future<User?> auth(String code, String password) async {
+  static Future<User?> auth(User user) async {
     var response = await HttpController.instance.post(
         'https://portal.ufsm.br/ru/j_security_check',
         Options(contentType: Headers.formUrlEncodedContentType),
-        {'j_username': code, 'j_password': password});
+        {'j_username': user.code, 'j_password': user.password});
     String? responseStr = response.data;
 
-    print({'j_username': code, 'j_password': password});
-    print(responseStr);
     if (response.statusCode != 302) return null;
 
     var response2 = await HttpController.instance.get(
@@ -80,13 +78,15 @@ class RuController {
       final regex = RegExp(
           r'<i class="icon-user"><\/i> (.+) <span class="caret"><\/span>');
       final match = regex.firstMatch(responseStr);
-      return User(match?.group(1) ?? 'Nome não encontrado');
+      user.name = match?.group(1) ?? 'Nome não encontrado';
+      user.save();
+      return user;
     } else {
       return null;
     }
   }
 
-  static Future<RuAgendamentoErro> agendar(RuSchedule schedule) async {
+  static Future<RuAgendamentoErro> schedule(RuSchedule schedule) async {
     var response2 = await HttpController.instance.get(
         'https://portal.ufsm.br/ru/usuario/extratoSimplificado.html',
         Options());
@@ -108,8 +108,8 @@ class RuController {
         'tessedit_pageseg_mode': 'SINGLE_WORD',
       });
       var data = {
-        'periodo.inicio': schedule.data,
-        'periodo.fim': schedule.data,
+        'periodo.inicio': DateFormat('dd/MM/yyyy').format(schedule.data),
+        'periodo.fim': DateFormat('dd/MM/yyyy').format(schedule.data),
         'restaurante': schedule.restaurante.code,
         'tiposRefeicao': schedule.refeicao.code,
         'opcaoVegetariana': schedule.vegetariano ? "true" : 'false',
@@ -159,5 +159,9 @@ class RuController {
     } else {
       return RuAgendamentoErro.unknown;
     }
+  }
+
+  static Future<bool?> checkSchedule(RuSchedule agedamento) async {
+    return null;
   }
 }

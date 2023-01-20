@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:agendai_ufsm/controllers/AppController.dart';
 import 'package:agendai_ufsm/controllers/RuController.dart';
+import 'package:agendai_ufsm/models/User.dart';
 import 'package:agendai_ufsm/pages/MyHomePage.dart';
 import 'package:agendai_ufsm/pages/TermosPage.dart';
 import 'package:flutter/material.dart';
@@ -100,8 +101,10 @@ class _LoginPage extends State<LoginPage> {
                             onPressed: () {
                               if (_formKey.currentState!.validate()) {
                                 AppController.instance.setLoading(true);
-                                RuController.auth(_matricula, _senha)
-                                    .then((value) {
+                                User user = User.load();
+                                user.code = _matricula;
+                                user.password = _senha;
+                                RuController.auth(user).then((value) {
                                   var bar;
                                   if (value != null) {
                                     bar = SnackBar(

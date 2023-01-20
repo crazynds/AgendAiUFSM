@@ -1,6 +1,7 @@
 import 'package:agendai_ufsm/components/DarkSwitch.dart';
 import 'package:agendai_ufsm/controllers/AppController.dart';
 import 'package:agendai_ufsm/controllers/RuController.dart';
+import 'package:agendai_ufsm/models/History.dart';
 import 'package:agendai_ufsm/models/RuScheduleConfiguration.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -20,6 +21,7 @@ class _MyHomePageState extends State<MyHomePage> {
   bool _cafe, _almoco, _janta;
   RestauranteUFSM _restauranteUfsm;
   List<bool> _diasDaSemana;
+  DateTime _initialDate;
 
   TextEditingController _dateController;
 
@@ -29,7 +31,8 @@ class _MyHomePageState extends State<MyHomePage> {
         _janta = false,
         _restauranteUfsm = RestauranteUFSM.ru1,
         _diasDaSemana = [false, true, true, true, true, true, false],
-        _dateController = TextEditingController() {
+        _dateController = TextEditingController(),
+        _initialDate = DateTime.now() {
     final ruConfig = RuScheduleConfiguration.load();
     _almoco = ruConfig.almoco;
     _cafe = ruConfig.cafe;
@@ -38,6 +41,7 @@ class _MyHomePageState extends State<MyHomePage> {
     _diasDaSemana = List<bool>.from(ruConfig.dayOfWeek);
     _dateController.text =
         DateFormat("dd/MM/yyyy").format(ruConfig.fimSchedule);
+    _initialDate = ruConfig.fimSchedule;
   }
 
   @override
@@ -71,8 +75,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             onTap: () async {
                               DateTime? pickedDate = await showDatePicker(
                                   context: context,
-                                  initialDate: DateTime.now().add(
-                                      Duration(days: 1)), //get today's date
+                                  initialDate: _initialDate, //get today's date
                                   firstDate: DateTime.now().add(Duration(
                                       days:
                                           1)), //DateTime.now() - not to allow to choose before today.
@@ -277,6 +280,11 @@ class _MyHomePageState extends State<MyHomePage> {
                           DateFormat("dd/MM/yyyy").parse(_dateController.text);
                       ru.local = _restauranteUfsm;
                       ru.save();
+                      var hist = History.load();
+                      hist.stopped = false;
+                      hist.clear();
+                      hist.save();
+
                       Workmanager().cancelByUniqueName("agendar-ru");
                       Workmanager().registerPeriodicTask(
                           "agendar-ru", "agendar-ru",

@@ -1,4 +1,6 @@
 import 'package:agendai_ufsm/controllers/FileController.dart';
+import 'package:agendai_ufsm/models/History.dart';
+import 'package:agendai_ufsm/models/RuSchedule.dart';
 import 'package:agendai_ufsm/models/RuScheduleConfiguration.dart';
 
 abstract class Model {
@@ -9,6 +11,10 @@ abstract class Model {
     switch (T) {
       case RuScheduleConfiguration:
         return RuScheduleConfiguration.fromJson(json) as T;
+      case RuSchedule:
+        return RuSchedule.fromJson(json) as T;
+      case History:
+        return History.fromJson(json) as T;
       default:
         throw UnimplementedError();
     }
