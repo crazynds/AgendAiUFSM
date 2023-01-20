@@ -28,9 +28,9 @@ class WorkmanagerController {
   }
 
   static Future<void> agendarRu() async {
+    RuScheduleConfiguration config = RuScheduleConfiguration.load();
     History hist = History.load();
     User user = User.load();
-    RuScheduleConfiguration config = RuScheduleConfiguration.load();
     // Calcular os próximos agendamentos
     //WorkmanagerController.calculateNextScheduleDate();
 
@@ -48,10 +48,9 @@ class WorkmanagerController {
     }
     print('Tarefa dentro do ok!!');
 
-    // Verificar se os agendamentos feitos e que estão de ontem para tras foram comparecidos]
+    // Verificar se os agendamentos feitos e que estão de ontem para tras foram comparecidos
     var now = DateTime.now().subtract(Duration(days: 1));
     for (RuSchedule sc in hist.lastScheduleMade) {
-      // Verificar o agendamento
       if (now.compareTo(sc.data) < 0) {
         // É possivel comparar e ver se ele foi no agendamento realizado
         User? u = await authRu(user);
@@ -62,16 +61,17 @@ class WorkmanagerController {
           return;
         }
         var r = await RuController.checkSchedule(sc);
+        // Por algum motivo não possivel verificar, apenas ignora e vai para a próxima iteração
         if (r == null) continue;
         if (r) {
           // O agendamento foi comparecido, então só remove ele da fila
           hist.lastScheduleMade.remove(sc);
         } else {
-          // O agendamento não foi comparecido,
+          // O agendamento não foi comparecido, desliga o agendador
           Workmanager().cancelByUniqueName('agendar-ru');
           hist.stopped = true;
 
-          // TODO - Envia notificação que ocorreu uma falta de agendamento, e logo vai ser cancelado o bot.
+          // TODO - Envia notificação que ocorreu uma falta de agendamento.
           return;
         }
       }
@@ -105,8 +105,10 @@ class WorkmanagerController {
           // TODO - Envia notificação que o agendamento não foi possivel com a mensagem de erro.
           break;
         case RuAgendamentoErro.matricula:
-          // Erro no login e senha cancel, cancel all agendamentos
-          hist.nextScheduleToMake.clear();
+          // Erro no login, cancela todos os agendamentos
+          hist.clear();
+          Workmanager().cancelByUniqueName('agendar-ru');
+          hist.stopped = true;
           // TODO - Envia notificação que deu problema ao na matricula
           break;
         case RuAgendamentoErro.captcha:
@@ -117,5 +119,8 @@ class WorkmanagerController {
           break;
       }
     }
+    user.save();
+    hist.save();
+    config.save();
   }
 }
