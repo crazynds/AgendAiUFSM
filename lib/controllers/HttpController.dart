@@ -10,6 +10,7 @@ class HttpController {
 
   final dio = Dio();
   final cookieJar = CookieJar();
+  late CookieManager cookieManager;
 
   Map<String, String> globalHeaders = {
     HttpHeaders.acceptHeader: '*/*',
@@ -17,7 +18,8 @@ class HttpController {
   };
 
   HttpController() {
-    dio.interceptors.add(CookieManager(cookieJar));
+    cookieManager = CookieManager(cookieJar);
+    dio.interceptors.add(cookieManager);
   }
 
   Future<Response<dynamic>> post(String url, Options options, Map body) async {

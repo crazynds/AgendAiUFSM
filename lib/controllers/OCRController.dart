@@ -35,5 +35,7 @@ class OCRController {
   Future<void> fixRecycle() async {
     await getText(
         'https://tesseract.projectnaptha.com/img/eng_bw.png', ['eng'], {});
+
+    print("executou fix recycle");
   }
 }
