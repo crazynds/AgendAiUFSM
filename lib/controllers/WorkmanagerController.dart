@@ -1,9 +1,11 @@
+import 'package:agendai_ufsm/controllers/NotificationController.dart';
 import 'package:agendai_ufsm/controllers/RuController.dart';
 import 'package:agendai_ufsm/models/History.dart';
 import 'package:agendai_ufsm/models/Model.dart';
 import 'package:agendai_ufsm/models/RuSchedule.dart';
 import 'package:agendai_ufsm/models/RuScheduleConfiguration.dart';
 import 'package:agendai_ufsm/models/User.dart';
+import 'package:intl/intl.dart';
 import 'package:workmanager/workmanager.dart';
 
 class WorkmanagerController {
@@ -22,23 +24,40 @@ class WorkmanagerController {
     User user = User.load();
     bool? autenticado = null;
     RuScheduleConfiguration config = RuScheduleConfiguration.load();
+    int id = 5;
+    var currentSchedule = DateTime.now();
+    if (currentSchedule.compareTo(hist.lastDayExecuted).isNegative) {
+      currentSchedule = hist.lastDayExecuted;
+    }
 
     // Verificar se terminou os agendamentos e finaliza o grupo de tarefas
     if (hist.stopped ||
-        config.fimSchedule
-            .add(Duration(days: 1))
-            .compareTo(DateTime.now())
-            .isNegative) {
+        config.fimSchedule.compareTo(currentSchedule).isNegative) {
       print("cancelamo a tarefa por chegar no dia final");
+      print(hist.stopped);
+      print(DateFormat("dd/MM/yyyy").format(config.fimSchedule));
+      print(DateFormat("dd/MM/yyyy").format(currentSchedule));
       // Cancela a tarefa
       Workmanager().cancelByUniqueName('agendar-ru');
+      hist.clear();
       hist.stopped = true;
-      // TODO - Envia notificação que chegou ao fim do schedule e o bot vai ser finalizado.
+      hist.save();
+      NotificationController.instance.showNotification(
+          ChannelNotification.lembrete,
+          NotificationPopup(
+              id: id++,
+              title: 'Agendamento automático desativado',
+              body:
+                  'O sistema de agendamento automático foi desativo por ter chego na data programada ou erros em relação ao login no portal.'));
       return;
     }
 
-    for (var currentSchedule = DateTime.now().add(Duration(days: 1));
-        DateTime.now().difference(currentSchedule).inDays <= 4 &&
+    print("Adicionando agendamentos a fila");
+    for (currentSchedule = currentSchedule.add(Duration(days: 1));
+        currentSchedule
+                    .difference(DateTime.now().subtract(Duration(seconds: 20)))
+                    .inDays <
+                4 &&
             currentSchedule.weekday < 7;
         currentSchedule = currentSchedule.add(Duration(days: 1))) {
       var dayWeek = currentSchedule.weekday;
@@ -53,7 +72,6 @@ class WorkmanagerController {
             refeicao: TipoRefeicao.cafe,
             restaurante: config.local,
             vegetariano: config.vegano));
-        print("Gerou cafe para: " + currentSchedule.toIso8601String());
       }
       if (config.almoco) {
         hist.nextScheduleToMake.add(RuSchedule(
@@ -72,6 +90,7 @@ class WorkmanagerController {
         print("Gerou janta para: " + currentSchedule.toIso8601String());
       }
     }
+    hist.lastDayExecuted = currentSchedule;
 
     // Função para fazer a autenticação
     authUser() async {
@@ -79,15 +98,14 @@ class WorkmanagerController {
         User? u = await RuController.auth(user);
         autenticado = u != null;
       }
-      if (autenticado!) {
-        print("cancelamo a tarefa por n conseguir autenticar");
-        Workmanager().cancelByUniqueName('agendar-ru');
-        hist.stopped = true;
-        // TODO - Emite notificação que não foi possivel autenticar
-        return;
+      if (autenticado == false) {
+        print("não foi possivel autenticar");
+        return false;
       }
+      return true;
     }
 
+    print("Verificando agendamentos antigos");
     // Verificar se os agendamentos feitos e que estão de ontem para tras foram comparecidos]
     var now = DateTime.now().subtract(Duration(days: 1));
     for (RuSchedule sc in hist.lastScheduleMade) {
@@ -106,25 +124,44 @@ class WorkmanagerController {
           Workmanager().cancelByUniqueName('agendar-ru');
           hist.stopped = true;
 
-          // TODO - Envia notificação que ocorreu uma falta de agendamento, e logo vai ser cancelado o bot.
+          NotificationController.instance.showNotification(
+              ChannelNotification.erro,
+              NotificationPopup(
+                  id: id++,
+                  title: 'Problemas no login',
+                  body: 'Houve problemas ao tentar fazer login no portal.'));
           return;
         }
       }
     }
+    print("Fazendo agendamentos");
     // Se não terminou os agendamentos, tentar efetuar os agendamentos em aberto
-    for (RuSchedule sc in hist.nextScheduleToMake) {
+    for (var x = 0; x < hist.nextScheduleToMake.length; x++) {
+      RuSchedule sc = hist.nextScheduleToMake.elementAt(x);
       if (sc.data.compareTo(DateTime.now()) < 0) {
         hist.nextScheduleToMake.remove(sc);
         continue;
       }
-      await authUser();
+      if (!await authUser()) {
+        return;
+      }
       RuAgendamentoErro erro = await RuController.schedule(sc);
+      print(erro.msg);
       switch (erro) {
         case RuAgendamentoErro.ok:
           // OK adiciona na fila de verificacao e remove da fila de fazer
           hist.lastScheduleMade.add(sc);
           hist.nextScheduleToMake.remove(sc);
-          // TODO - Envia notificação que foi agendado com sucesso para o dia X.
+          x--;
+
+          final day = DateFormat("dd/MM/yyyy").format(sc.data);
+          final refeicao = sc.refeicao.name;
+          NotificationController.instance.showNotification(
+              ChannelNotification.avisos,
+              NotificationPopup(
+                  id: id++,
+                  title: 'Agendamento realizado!',
+                  body: 'Dia ${day} para o ${refeicao}'));
           break;
         case RuAgendamentoErro.agendamentoCheio:
         // Erro que o RU está cheio, ou que o tempo limite foi atingido, cancel
@@ -135,12 +172,23 @@ class WorkmanagerController {
         case RuAgendamentoErro.unknown:
           // Erro desconhecido, cancel
           hist.nextScheduleToMake.remove(sc);
-          // TODO - Envia notificação que o agendamento não foi possivel com a mensagem de erro.
+          x--;
+          NotificationController.instance.showNotification(
+              ChannelNotification.avisos,
+              NotificationPopup(
+                  id: id++,
+                  title: 'Agendamento não realizado!',
+                  body: erro.msg));
           break;
         case RuAgendamentoErro.matricula:
           // Erro no login e senha cancel, cancel all agendamentos
           hist.nextScheduleToMake.clear();
-          // TODO - Envia notificação que deu problema ao na matricula
+          NotificationController.instance.showNotification(
+              ChannelNotification.avisos,
+              NotificationPopup(
+                  id: id++,
+                  title: 'Agendamento não realizado!',
+                  body: erro.msg));
           break;
         case RuAgendamentoErro.captcha:
         // Erro no captcha, retry na próxima vez

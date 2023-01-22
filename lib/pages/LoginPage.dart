@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:agendai_ufsm/controllers/AppController.dart';
+import 'package:agendai_ufsm/controllers/NotificationController.dart';
 import 'package:agendai_ufsm/controllers/RuController.dart';
 import 'package:agendai_ufsm/models/User.dart';
 import 'package:agendai_ufsm/pages/MyHomePage.dart';
@@ -139,6 +140,17 @@ class _LoginPage extends State<LoginPage> {
                                   builder: (context) => TermosPage()));
                             },
                             child: Text('Entenda como funciona!')),
+                        ElevatedButton(
+                            onPressed: () {
+                              final not = NotificationPopup(
+                                id: 0,
+                                title: 'Teste Title',
+                                body: 'Esse é um corpo teste',
+                              );
+                              NotificationController.instance.showNotification(
+                                  ChannelNotification.lembrete, not);
+                            },
+                            child: Text('Emite notificação teste!')),
                       ]),
                 ),
               ),

@@ -327,7 +327,14 @@ class _MyHomePageState extends State<MyHomePage> {
                       print('executou aq');
                       WorkmanagerController.agendarRu();
                     },
-                    child: Text('Fazendo agendamento agora'))
+                    child: Text('Fazendo agendamento agora')),
+                ElevatedButton(
+                    onPressed: () {
+                      var hist = History.load();
+                      hist.clear();
+                      hist.save();
+                    },
+                    child: Text('Reset History'))
               ],
             )),
       ),

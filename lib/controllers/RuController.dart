@@ -126,9 +126,9 @@ class RuController {
       tries++;
     } while (
         responseStr.contains('<span class="pill error" id="_captcha">Campo') &&
-            tries <= 8);
+            tries <= 16);
 
-    if (tries > 8 &&
+    if (tries > 16 &&
         responseStr.contains('<span class="pill error" id="_captcha">Campo')) {
       return RuAgendamentoErro.captcha;
     }
@@ -215,12 +215,8 @@ class RuController {
     if (response.statusCode != 200 || response.data == null) {
       return null;
     } else {
-      final match = jsonRegex.firstMatch(response.data);
-      if (match != null) {
-        final group = match?.group(1) as String;
-        print(group);
-        return true;
-      }
+      final match = jsonRegex.allMatches(response.data);
+      return true;
     }
     return null;
   }

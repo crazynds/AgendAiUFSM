@@ -24,11 +24,9 @@ class OCRController {
       url = fullPath;
     }
     var langs = selectList.join("+");
-    print('start processing');
     String _ocrText =
         await FlutterTesseractOcr.extractText(url, language: langs, args: args);
     print(_ocrText);
-    print('end processing');
     return _ocrText;
   }
 
