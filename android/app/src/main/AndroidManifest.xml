@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.agendai_ufsm">
+    package="br.com.nextline.agendai_ufsm">
    <application
         android:label="agendai_ufsm"
         android:name="${applicationName}"

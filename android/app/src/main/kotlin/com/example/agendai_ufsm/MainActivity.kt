@@ -1,4 +1,4 @@
-package com.example.agendai_ufsm
+package br.com.nextline.agendai_ufsm
 
 import io.flutter.embedding.android.FlutterActivity
 
