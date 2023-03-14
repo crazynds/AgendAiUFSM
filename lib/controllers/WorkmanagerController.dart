@@ -20,7 +20,6 @@ class WorkmanagerController {
   }
 
   static Future<void> agendarRu() async {
-    RuScheduleConfiguration config = RuScheduleConfiguration.load();
     History hist = History.load();
     User user = User.load();
     bool? autenticado = null;
