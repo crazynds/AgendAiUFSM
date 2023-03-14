@@ -1,5 +1,6 @@
 import 'package:agendai_ufsm/MyApp.dart';
 import 'package:agendai_ufsm/controllers/FileController.dart';
+import 'package:agendai_ufsm/controllers/NotificationController.dart';
 import 'package:agendai_ufsm/controllers/OCRController.dart';
 import 'package:agendai_ufsm/controllers/WorkmanagerController.dart';
 import 'package:flutter/material.dart';
@@ -10,9 +11,10 @@ import 'package:workmanager/workmanager.dart';
 @pragma('vm:entry-point')
 void callbackDispatcher() {
   Workmanager().executeTask((task, inputData) async {
-    await FileController.loadDirectory();
-    await WorkmanagerController.callable(task, inputData);
     await OCRController.instance.fixRecycle();
+    await FileController.loadDirectory();
+    await NotificationController.instance.setup();
+    await WorkmanagerController.callable(task, inputData);
     return true;
   });
 }
@@ -20,6 +22,7 @@ void callbackDispatcher() {
 void main() async {
   await dotenv.load(fileName: ".env");
   await FileController.loadDirectory();
+  await NotificationController.instance.setup();
   runApp(const MainApp());
 }
 

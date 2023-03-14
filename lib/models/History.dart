@@ -6,19 +6,20 @@ class History extends Model {
   static const String _fileName = 'history.json';
   List<RuSchedule> lastScheduleMade = <RuSchedule>[];
   List<RuSchedule> nextScheduleToMake = <RuSchedule>[];
-  DateTime? lastDayExecuted;
+  DateTime lastDayExecuted;
   bool stopped = false;
 
   History(
       {required this.lastScheduleMade,
       required this.nextScheduleToMake,
       required this.stopped,
-      lastDayExecuted});
+      required this.lastDayExecuted});
 
   void clear() {
     lastScheduleMade.clear();
     nextScheduleToMake.clear();
     lastDayExecuted = DateTime.now();
+    stopped = false;
   }
 
   @override
@@ -32,7 +33,7 @@ class History extends Model {
       stopped: data['stopped'] as bool? ?? true,
       lastDayExecuted: (data['lastDayExecuted'] != null)
           ? DateFormat("dd/MM/yyyy").parse(data['lastDayExecuted'])
-          : null);
+          : DateTime.now());
 
   @override
   Map<String, dynamic> toJson() {
@@ -40,9 +41,7 @@ class History extends Model {
       'lastScheduleMade': lastScheduleMade,
       'nextScheduleToMake': nextScheduleToMake,
       'stopped': stopped,
-      'lastDayExecuted': (lastDayExecuted != null)
-          ? DateFormat("dd/MM/yyyy").format(lastDayExecuted!)
-          : null
+      'lastDayExecuted': DateFormat("dd/MM/yyyy").format(lastDayExecuted)
     };
   }
 

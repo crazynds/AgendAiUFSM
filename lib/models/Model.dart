@@ -2,6 +2,7 @@ import 'package:agendai_ufsm/controllers/FileController.dart';
 import 'package:agendai_ufsm/models/History.dart';
 import 'package:agendai_ufsm/models/RuSchedule.dart';
 import 'package:agendai_ufsm/models/RuScheduleConfiguration.dart';
+import 'package:agendai_ufsm/models/User.dart';
 
 abstract class Model {
   static final Map _instaces = {};
@@ -15,6 +16,8 @@ abstract class Model {
         return RuSchedule.fromJson(json) as T;
       case History:
         return History.fromJson(json) as T;
+      case User:
+        return User.fromJson(json) as T;
       default:
         throw UnimplementedError();
     }

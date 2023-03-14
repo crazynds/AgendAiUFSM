@@ -24,16 +24,16 @@ class OCRController {
       url = fullPath;
     }
     var langs = selectList.join("+");
-    print('start processing');
     String _ocrText =
         await FlutterTesseractOcr.extractText(url, language: langs, args: args);
     print(_ocrText);
-    print('end processing');
     return _ocrText;
   }
 
   Future<void> fixRecycle() async {
     await getText(
         'https://tesseract.projectnaptha.com/img/eng_bw.png', ['eng'], {});
+
+    print("executou fix recycle");
   }
 }

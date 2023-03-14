@@ -126,9 +126,9 @@ class RuController {
       tries++;
     } while (
         responseStr.contains('<span class="pill error" id="_captcha">Campo') &&
-            tries <= 8);
+            tries <= 16);
 
-    if (tries > 8 &&
+    if (tries > 16 &&
         responseStr.contains('<span class="pill error" id="_captcha">Campo')) {
       return RuAgendamentoErro.captcha;
     }
@@ -161,7 +161,63 @@ class RuController {
     }
   }
 
+  // Null == request não foi feito, false == request foi feito e garantido que ele não foi, true == request foi feito e garantido que ele foi
   static Future<bool?> checkSchedule(RuSchedule agedamento) async {
+    final jsonRegex =
+        RegExp(r'dwr\.engine\.remote\.handleCallback\("5","0",(.)*\);');
+
+    final day = agedamento.data.day;
+    final month = agedamento.data.month;
+    final year = agedamento.data.year;
+    final List<Cookie> lCookies = await HttpController.instance.cookieJar
+        .loadForRequest(
+            Uri.parse("https://portal.ufsm.br/ru/j_security_check"));
+
+    String sessionId = '';
+    for (Cookie c in lCookies) {
+      if (c.name == 'DWRSESSIONID') {
+        sessionId = c.value;
+      }
+    }
+    final data = {
+      'callCount': '1',
+      'c0-scriptName': 'agendamentoUsuarioAjaxTable',
+      'c0-methodName': 'search',
+      'c0-id': '0',
+      'c0-param0': 'number:0',
+      'c0-param1': 'number:20',
+      'c0-e1': 'string:$day%2F$month%2F$year',
+      'c0-e2': 'string:$day%2F$month%2F$year',
+      'c0-e3': 'string:dataRefAgendada',
+      'c0-e4': 'string:desc',
+      'c0-e5': 'number:1',
+      'c0-e6': 'number:1',
+      'c0-e7': 'number:2',
+      'c0-e8': 'number:0',
+      'c0-e9': 'number:20',
+      'c0-e10': 'number:1',
+      'c0-param2':
+          'Object_Object:{inicio:reference:c0-e1, fim:reference:c0-e2, orderBy:reference:c0-e3, orderMode:reference:c0-e4, currentPage:reference:c0-e5, totalPages:reference:c0-e6, totalItems:reference:c0-e7, firstResult:reference:c0-e8, maxResults:reference:c0-e9, lastResult:reference:c0-e10}',
+      'batchId': '6',
+      'instanceId': '0',
+      'page':
+          '%2Fru%2Fusuario%2Fagendamento%2Fagendamento.html%3Faction%3Dlist',
+      'scriptSessionId': sessionId
+    };
+    // final body =
+    //     data.entries.map((e) => "${e.key}=${e.value}\n").toList().join("\n");
+
+    var response = await HttpController.instance.post(
+        "https://portal.ufsm.br/ru/dwr/call/plaincall/agendamentoUsuarioAjaxTable.search.dwr",
+        Options(contentType: Headers.textPlainContentType),
+        data);
+
+    if (response.statusCode != 200 || response.data == null) {
+      return null;
+    } else {
+      final match = jsonRegex.allMatches(response.data);
+      return true;
+    }
     return null;
   }
 }

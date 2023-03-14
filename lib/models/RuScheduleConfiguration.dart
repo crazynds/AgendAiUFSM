@@ -6,7 +6,7 @@ class RuScheduleConfiguration extends Model {
   static final String _fileName = 'scheduleConfig.json';
   List<bool> dayOfWeek;
 
-  bool cafe, almoco, janta;
+  bool cafe, almoco, janta, vegano;
   RestauranteUFSM local;
 
   DateTime fimSchedule;
@@ -17,7 +17,8 @@ class RuScheduleConfiguration extends Model {
       required this.janta,
       required this.local,
       required this.dayOfWeek,
-      required this.fimSchedule});
+      required this.fimSchedule,
+      required this.vegano});
 
   @override
   factory RuScheduleConfiguration.fromJson(Map<String, dynamic> data) =>
@@ -31,7 +32,8 @@ class RuScheduleConfiguration extends Model {
                   DateFormat("dd/MM/yyyy")
                       .format(DateTime.now().subtract(Duration(days: 3)))),
           dayOfWeek: List<bool>.from(data['dayOfWeek'] ??
-              [false, false, false, false, false, false, false]));
+              [false, false, false, false, false, false, false]),
+          vegano: data['vegano'] ?? false);
 
   @override
   Map<String, dynamic> toJson() => {
@@ -40,7 +42,8 @@ class RuScheduleConfiguration extends Model {
         'janta': janta,
         'restaurante': local.index,
         'fimSchedule': DateFormat('dd/MM/yyyy').format(fimSchedule),
-        'dayOfWeek': dayOfWeek
+        'dayOfWeek': dayOfWeek,
+        'vegano': vegano,
       };
 
   static RuScheduleConfiguration load() {

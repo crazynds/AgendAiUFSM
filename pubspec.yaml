@@ -47,6 +47,8 @@ dependencies:
   workmanager: ^0.5.1
   url_launcher: ^5.2.7
   flutter_dotenv: ^5.0.2
+  flutter_local_notifications: ^13.0.0
+  flutter_native_timezone: ^2.0.0
 
 dev_dependencies:
   flutter_test:

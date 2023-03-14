@@ -1,6 +1,7 @@
 import 'package:agendai_ufsm/components/DarkSwitch.dart';
 import 'package:agendai_ufsm/controllers/AppController.dart';
 import 'package:agendai_ufsm/controllers/RuController.dart';
+import 'package:agendai_ufsm/controllers/WorkmanagerController.dart';
 import 'package:agendai_ufsm/models/History.dart';
 import 'package:agendai_ufsm/models/RuScheduleConfiguration.dart';
 import 'package:flutter/material.dart';
@@ -22,6 +23,7 @@ class _MyHomePageState extends State<MyHomePage> {
   RestauranteUFSM _restauranteUfsm;
   List<bool> _diasDaSemana;
   DateTime _initialDate;
+  bool _vegano;
 
   TextEditingController _dateController;
 
@@ -29,6 +31,7 @@ class _MyHomePageState extends State<MyHomePage> {
       : _almoco = true,
         _cafe = false,
         _janta = false,
+        _vegano = false,
         _restauranteUfsm = RestauranteUFSM.ru1,
         _diasDaSemana = [false, true, true, true, true, true, false],
         _dateController = TextEditingController(),
@@ -37,6 +40,7 @@ class _MyHomePageState extends State<MyHomePage> {
     _almoco = ruConfig.almoco;
     _cafe = ruConfig.cafe;
     _janta = ruConfig.janta;
+    _vegano = ruConfig.vegano;
     _restauranteUfsm = ruConfig.local;
     _diasDaSemana = List<bool>.from(ruConfig.dayOfWeek);
     _dateController.text =
@@ -75,7 +79,13 @@ class _MyHomePageState extends State<MyHomePage> {
                             onTap: () async {
                               DateTime? pickedDate = await showDatePicker(
                                   context: context,
-                                  initialDate: _initialDate, //get today's date
+                                  initialDate: DateTime.now()
+                                              .add(Duration(days: 1))
+                                              .compareTo(_initialDate) <
+                                          0
+                                      ? _initialDate
+                                      : DateTime.now().add(
+                                          Duration(days: 1)), //get today's date
                                   firstDate: DateTime.now().add(Duration(
                                       days:
                                           1)), //DateTime.now() - not to allow to choose before today.
@@ -267,8 +277,24 @@ class _MyHomePageState extends State<MyHomePage> {
                     // todo
                   ],
                 ),
+                Row(
+                  children: [
+                    Checkbox(
+                        value: _vegano,
+                        onChanged: (value) {
+                          if (value == null) return;
+                          setState(() {
+                            _vegano = value;
+                          });
+                        }),
+                    Text(
+                      "Opção vegana",
+                      style: TextStyle(fontSize: 16),
+                    )
+                  ],
+                ),
                 Padding(
-                  padding: const EdgeInsets.only(top: 28.0),
+                  padding: const EdgeInsets.only(top: 16.0),
                   child: ElevatedButton(
                     onPressed: () {
                       var ru = RuScheduleConfiguration.load();
@@ -290,10 +316,25 @@ class _MyHomePageState extends State<MyHomePage> {
                           "agendar-ru", "agendar-ru",
                           frequency: Duration(minutes: 15),
                           initialDelay: Duration(minutes: 1));
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          content: Text('Agendamento automático ativado')));
                     },
                     child: Text('Iniciar agendamento'),
                   ),
                 ),
+                ElevatedButton(
+                    onPressed: () {
+                      print('executou aq');
+                      WorkmanagerController.agendarRu();
+                    },
+                    child: Text('Fazendo agendamento agora')),
+                ElevatedButton(
+                    onPressed: () {
+                      var hist = History.load();
+                      hist.clear();
+                      hist.save();
+                    },
+                    child: Text('Reset History'))
               ],
             )),
       ),
